@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct calori_tracking_appApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ListView()
         }
+        .modelContainer(for: [FoodEntry.self, FoodItem.self, DailyGoal.self])
     }
 }

@@ -1,27 +1,27 @@
-//
-//  AddFoodItemView.swift
-//  calori-tracking-app
-//
-//  Created by Fırat İlhan on 3.07.2026.
-//
-
-
 import SwiftUI
 import SwiftData
 import PhotosUI
 
-struct AddFoodItemView: View {
+struct AddEntryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var imageData: Data?
-    @State private var name: String = ""
+    @State private var content: String = ""
+    @State private var quantityText: String = "1"
     @State private var unitCalorieText: String = ""
-    @State private var unitLabel: String = "adet"
+
+    private var quantity: Double {
+        Double(quantityText.replacingOccurrences(of: ",", with: ".")) ?? 1
+    }
 
     private var unitCalorie: Double {
         Double(unitCalorieText.replacingOccurrences(of: ",", with: ".")) ?? 0
+    }
+
+    private var totalCalorie: Int {
+        Int((quantity * unitCalorie).rounded())
     }
 
     var body: some View {
@@ -33,7 +33,7 @@ struct AddFoodItemView: View {
                             Image(uiImage: uiImage)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(maxHeight: 160)
+                                .frame(maxHeight: 200)
                                 .frame(maxWidth: .infinity)
                         } else {
                             HStack {
@@ -44,7 +44,7 @@ struct AddFoodItemView: View {
                                     Text("Fotoğraf Seç")
                                 }
                                 .foregroundStyle(.secondary)
-                                .padding(.vertical, 24)
+                                .padding(.vertical, 30)
                                 Spacer()
                             }
                         }
@@ -58,13 +58,19 @@ struct AddFoodItemView: View {
                     }
                 }
 
-                Section("Bilgiler") {
-                    TextField("Yiyecek adı (Örn: Karpuz)", text: $name)
+                Section("İçerik") {
+                    TextField("Örn: Karpuz", text: $content, axis: .vertical)
+                        .lineLimit(2...4)
+                }
+
+                Section {
                     HStack {
-                        Text("Birim")
+                        Text("Adet / Miktar")
                         Spacer()
-                        TextField("adet / dilim / porsiyon", text: $unitLabel)
+                        TextField("1", text: $quantityText)
+                            .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
                     }
                     HStack {
                         Text("Birim başına kcal")
@@ -74,9 +80,26 @@ struct AddFoodItemView: View {
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
                     }
+                    HStack {
+                        Text("Toplam")
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Text("\(totalCalorie) kcal")
+                            .fontWeight(.semibold)
+                    }
+                } header: {
+                    Text("Miktar ve Kalori")
+                } footer: {
+                    Text("Basit girişte Adet'i 1 bırakıp direkt toplam kaloriyi 'birim başına kcal' alanına yazabilirsin. Örn: 4 dilim karpuz, dilim başına 20 kcal → 80 kcal.")
+                }
+
+                Section {
+                    Text("Tarih ve saat otomatik eklenecek: \(Date().formatted(date: .abbreviated, time: .shortened))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Yeni Yiyecek")
+            .navigationTitle("Yeni Kayıt")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("İptal") { dismiss() }
@@ -85,20 +108,22 @@ struct AddFoodItemView: View {
                     Button("Kaydet") {
                         save()
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || unitCalorie <= 0)
+                    .disabled(totalCalorie <= 0)
                 }
             }
         }
     }
 
     private func save() {
-        let item = FoodItem(
-            name: name.trimmingCharacters(in: .whitespaces),
+        let entry = FoodEntry(
+            date: Date(),
+            calorie: totalCalorie,
+            content: content,
             imageData: imageData,
-            unitCalorie: unitCalorie,
-            unitLabel: unitLabel.trimmingCharacters(in: .whitespaces).isEmpty ? "adet" : unitLabel
+            quantity: quantity,
+            unitCalorie: unitCalorie
         )
-        modelContext.insert(item)
+        modelContext.insert(entry)
         dismiss()
     }
 }

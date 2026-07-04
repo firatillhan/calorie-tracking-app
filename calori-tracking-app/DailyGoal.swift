@@ -1,3 +1,11 @@
+//
+//  DailyGoal.swift
+//  calori-tracking-app
+//
+//  Created by Fırat İlhan on 4.07.2026.
+//
+
+
 import Foundation
 import SwiftData
 

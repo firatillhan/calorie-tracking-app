@@ -1,5 +1,5 @@
 import SwiftUI
-
+import SwiftData
 struct OnboardingView: View {
     var isEditingExisting: Bool = false
 
@@ -9,9 +9,9 @@ struct OnboardingView: View {
     @AppStorage("userGender") private var storedGender: String = "male"
     @AppStorage("userActivity") private var storedActivity: String = "sedentary"
     @AppStorage("userGoal") private var storedGoal: String = "maintain"
-    @AppStorage("dailyGoal") private var dailyGoal: Int = 2000
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
 
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
     @State private var step: Int = 0
@@ -271,7 +271,10 @@ struct OnboardingView: View {
         storedGender = gender
         storedActivity = activity
         storedGoal = goal
-        dailyGoal = recommendedCalorie
+
+        let newGoal = DailyGoal(date: Date(), value: recommendedCalorie)
+        modelContext.insert(newGoal)
+
         hasCompletedOnboarding = true
         dismiss()
     }

@@ -1,5 +1,6 @@
 import Foundation
 import HealthKit
+import Combine
 
 @MainActor
 final class HealthKitManager: ObservableObject {
@@ -7,13 +8,19 @@ final class HealthKitManager: ObservableObject {
 
     private let healthStore = HKHealthStore()
 
-    @Published var burnedCalories: Int = 0
+    /// Gün başlangıcına göre (startOfDay) yakılan aktif kalori değerleri
+    @Published var burnedCaloriesByDay: [Date: Int] = [:]
     @Published var isAuthorized: Bool = false
 
     private init() {}
 
     var isHealthDataAvailable: Bool {
         HKHealthStore.isHealthDataAvailable()
+    }
+
+    func burnedCalories(for date: Date) -> Int {
+        let day = Calendar.current.startOfDay(for: date)
+        return burnedCaloriesByDay[day] ?? 0
     }
 
     func requestAuthorization() {
@@ -28,32 +35,45 @@ final class HealthKitManager: ObservableObject {
             Task { @MainActor in
                 self?.isAuthorized = success
                 if success {
-                    self?.fetchBurnedCalories(for: Date())
+                    self?.fetchBurnedCaloriesRange()
                 }
             }
         }
     }
 
-    func fetchBurnedCalories(for date: Date) {
+    /// Son `daysBack` gün için (bugün dahil) günlük yakılan kaloriyi tek sorguda çeker.
+    func fetchBurnedCaloriesRange(daysBack: Int = 120) {
         guard isHealthDataAvailable,
               let activeEnergyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else {
             return
         }
 
         let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: date)
-        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else { return }
+        let todayStart = calendar.startOfDay(for: Date())
+        guard let rangeStart = calendar.date(byAdding: .day, value: -daysBack, to: todayStart),
+              let rangeEnd = calendar.date(byAdding: .day, value: 1, to: todayStart) else { return }
 
-        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: endOfDay, options: .strictStartDate)
+        var interval = DateComponents()
+        interval.day = 1
 
-        let query = HKStatisticsQuery(
+        let query = HKStatisticsCollectionQuery(
             quantityType: activeEnergyType,
-            quantitySamplePredicate: predicate,
-            options: .cumulativeSum
-        ) { [weak self] _, statistics, _ in
-            let sum = statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+            quantitySamplePredicate: nil,
+            options: .cumulativeSum,
+            anchorDate: todayStart,
+            intervalComponents: interval
+        )
+
+        query.initialResultsHandler = { [weak self] _, results, _ in
+            guard let results else { return }
+            var newValues: [Date: Int] = [:]
+            results.enumerateStatistics(from: rangeStart, to: rangeEnd) { statistics, _ in
+                let day = calendar.startOfDay(for: statistics.startDate)
+                let sum = statistics.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+                newValues[day] = Int(sum.rounded())
+            }
             Task { @MainActor in
-                self?.burnedCalories = Int(sum.rounded())
+                self?.burnedCaloriesByDay.merge(newValues) { _, new in new }
             }
         }
 

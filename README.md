@@ -1,8 +1,16 @@
 # Kalori Takip Uygulaması
 
-Günlük kalori alımını takip etmek, kişiye özel kalori hedefini hesaplamak ve
-Apple Health üzerinden yakılan kaloriyi hedefe yansıtmak için geliştirilmiş
-basit bir iOS uygulaması.
+Fikrinden önce yediklerime zaten dikkat ediyordum ama kendime net bir limit
+koymuyordum. "Kalori açığı oluşturmalısın" gibi cümleleri duyunca, bunu
+somut bir şekilde takip edebileceğim bir uygulama yapmak istedim. Piyasadaki
+hazır kalori takip uygulamalarının çoğu reklam ve abonelik dolu, gereksiz
+özelliklerle karmaşıklaşmış durumda; benim ihtiyaç duyduğum bazı basit
+özellikler (örneğin Apple Health'ten yakılan kaloriyi otomatik günlük
+hedefe yansıtmak gibi) ise ya hiç yoktu ya da ücretli sürümde kilitliydi.
+Bu yüzden kendi verim tamamen kendi kontrolümde kalacak şekilde, sadece
+ihtiyacım olan özelliklerle, sade bir versiyonu kendim geliştirmeyi tercih
+ettim. Kullanmak isteyen olursa diye projeyi GitHub'a açık şekilde paylaşmayı
+tercih ettim.
 
 ## Özellikler
 
@@ -44,4 +52,3 @@ geliştirilmiştir — mimari kararlar ve kod yazımı büyük ölçüde yapay z
 desteğiyle yapılmış, geliştirici test ederek ve davranışı doğrulayarak süreci
 yönlendirmiştir. SwiftData daha önce UIKit projelerinde kullanılmış olsa da,
 SwiftUI bu proje kapsamında ilk kez kullanılan framework'tür.
-# calorie-tracking-app
