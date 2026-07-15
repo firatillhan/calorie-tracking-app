@@ -47,8 +47,11 @@ tercih ettim.
 
 ## Geliştirme Notu
 
-Bu proje, Claude (Anthropic) ile birlikte "vibe coding" yaklaşımıyla
-geliştirilmiştir — mimari kararlar ve kod yazımı büyük ölçüde yapay zeka
-desteğiyle yapılmış, geliştirici test ederek ve davranışı doğrulayarak süreci
-yönlendirmiştir. SwiftData daha önce UIKit projelerinde kullanılmış olsa da,
-SwiftUI bu proje kapsamında ilk kez kullanılan framework'tür.
+Bu projede SwiftUI'ı ilk kez kullandım; SwiftData'yı ise daha önce UIKit
+projelerimde kullanmıştım. Geliştirme sürecinde Claude'dan (Anthropic)
+aktif olarak yararlandım: mimari kararları ve özellik kapsamını ben
+belirledim, üretilen kodu okuyup anlayarak projeye dahil ettim ve her
+davranışı gerçek cihazda test ederek doğruladım. Örneğin tarihe bağlı
+hedef geçmişi ve HealthKit entegrasyonu gibi kısımların veri modelini,
+uygulamanın gerçek kullanımda nasıl davranması gerektiğine göre kendim
+tasarlayıp yönlendirdim.
